@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, CheckCircle } from "lucide-react";
+import { addToWaitlist } from "../../app/actions/waitlist";
 
 interface WaitlistModalProps {
   open: boolean;
@@ -13,29 +14,27 @@ interface WaitlistModalProps {
 }
 
 const WaitlistModal = ({ open, onOpenChange }: WaitlistModalProps) => {
-  const [email, setEmail] = useState("");
-  const [role, setRole] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!email || !role) return;
-    
+  const handleSubmit = async (formData: FormData) => {
     setIsSubmitting(true);
+    setError("");
     
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    const result = await addToWaitlist(formData);
     
-    console.log("Waitlist submission:", { email, role });
+    if (result.success) {
+      setIsSuccess(true);
+      setTimeout(() => {
+        setIsSuccess(false);
+        onOpenChange(false);
+      }, 2000);
+    } else {
+      setError(result.error);
+    }
     
-    // Reset form and close modal
-    setEmail("");
-    setRole("");
     setIsSubmitting(false);
-    onOpenChange(false);
-    
-    // You could add a toast notification here
-    alert("Thanks for joining our waitlist! We'll be in touch soon.");
   };
 
   const roles = [
@@ -62,22 +61,30 @@ const WaitlistModal = ({ open, onOpenChange }: WaitlistModalProps) => {
           </p>
         </DialogHeader>
         
-        <form onSubmit={handleSubmit} className="space-y-4 mt-4">
+        {isSuccess ? (
+          <div className="text-center py-8">
+            <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
+            <h3 className="text-xl font-semibold mb-2">Welcome to the waitlist!</h3>
+            <p className="text-muted-foreground">
+              Thanks for joining! We'll be in touch soon with early access.
+            </p>
+          </div>
+        ) : (
+        <form action={handleSubmit} className="space-y-4 mt-4">
           <div className="space-y-2">
             <Label htmlFor="email">Email Address</Label>
             <Input
               id="email"
+              name="email"
               type="email"
               placeholder="your@email.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
               required
             />
           </div>
           
           <div className="space-y-2">
             <Label htmlFor="role">Role</Label>
-            <Select value={role} onValueChange={setRole} required>
+            <Select name="role" required>
               <SelectTrigger>
                 <SelectValue placeholder="Select your role" />
               </SelectTrigger>
@@ -91,15 +98,22 @@ const WaitlistModal = ({ open, onOpenChange }: WaitlistModalProps) => {
             </Select>
           </div>
           
+          {error && (
+            <div className="text-red-500 text-sm text-center p-2 bg-red-50 rounded">
+              {error}
+            </div>
+          )}
+          
           <Button 
             type="submit" 
-            className="w-full bg-primary hover:bg-primary/90" 
-            disabled={!email || !role || isSubmitting}
+            className="w-full bg-primary hover:bg-primary/90"
+            disabled={isSubmitting}
           >
             {isSubmitting ? "Joining Waitlist..." : "Join Waitlist"}
             {!isSubmitting && <ArrowRight className="w-4 h-4 ml-2" />}
           </Button>
         </form>
+        )}
       </DialogContent>
     </Dialog>
   );

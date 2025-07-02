@@ -31,9 +31,6 @@ const HeroSection = ({ onGetEarlyAccess }: HeroSectionProps) => {
               Get Early Access
               <ArrowRight className="w-5 h-5 ml-2" />
             </Button>
-            <Button variant="outline" size="lg" className="px-8 py-4 text-lg border-border/50 hover:border-primary/50">
-              View Demo
-            </Button>
           </div>
         </div>
       </div>
