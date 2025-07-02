@@ -18,7 +18,6 @@ export default function SignInButton({ redirectTo = "/", className }: SignInButt
     setIsLoading(true)
     
     try {
-      alert('what')
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "github",
         options: {
