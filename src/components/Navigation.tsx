@@ -2,6 +2,7 @@
 import { ArrowRight, Github, Building2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import SignInButton from "./SignInButton";
 
 interface NavigationProps {
   onGetEarlyAccess: () => void;
@@ -34,7 +35,7 @@ const Navigation = ({ onGetEarlyAccess }: NavigationProps) => {
             </a>
           </div>
           <div className="flex items-center gap-4">
-            <Button variant="ghost" size="sm">Sign In</Button>
+            <SignInButton className="size-sm" />
             <Button size="sm" className="bg-primary hover:bg-primary/90" onClick={onGetEarlyAccess}>
               Get Early Access
               <ArrowRight className="w-4 h-4 ml-2" />
