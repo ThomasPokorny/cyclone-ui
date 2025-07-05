@@ -35,7 +35,7 @@ const Navigation = ({ onGetEarlyAccess }: NavigationProps) => {
             </a>
           </div>
           <div className="flex items-center gap-4">
-            <SignInButton className="size-sm" />
+            <SignInButton redirectTo="/dashboard" className="size-sm" />
             <Button size="sm" className="bg-primary hover:bg-primary/90" onClick={onGetEarlyAccess}>
               Get Early Access
               <ArrowRight className="w-4 h-4 ml-2" />

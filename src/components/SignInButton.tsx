@@ -8,9 +8,11 @@ import { createClient } from "@/utils/supabase/client"
 interface SignInButtonProps {
   redirectTo?: string
   className?: string
+  installApp?: boolean
+  children?: React.ReactNode
 }
 
-export default function SignInButton({ redirectTo = "/", className }: SignInButtonProps) {
+export default function SignInButton({ redirectTo = "/", className, installApp = false, children }: SignInButtonProps) {
   const [isLoading, setIsLoading] = useState(false)
   const supabase = createClient()
 
@@ -18,10 +20,12 @@ export default function SignInButton({ redirectTo = "/", className }: SignInButt
     setIsLoading(true)
     
     try {
+      const callbackUrl = `${window.location.origin}/auth/callback?next=${redirectTo}${installApp ? '&install_app=true' : ''}`
+      
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "github",
         options: {
-          redirectTo: `${window.location.origin}/auth/callback?next=${redirectTo}`,
+          redirectTo: callbackUrl,
           scopes: "read:user user:email",
         },
       })
@@ -43,8 +47,12 @@ export default function SignInButton({ redirectTo = "/", className }: SignInButt
       className={className}
       variant="outline"
     >
-      <Github className="w-4 h-4 mr-2" />
-      {isLoading ? "Signing in..." : "Sign in with GitHub"}
+      {children || (
+        <>
+          <Github className="w-4 h-4 mr-2" />
+          {isLoading ? "Signing in..." : "Sign in with GitHub"}
+        </>
+      )}
     </Button>
   )
 }
