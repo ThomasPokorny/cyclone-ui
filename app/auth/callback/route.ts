@@ -1,4 +1,4 @@
-import { createClient } from "@/utils/supabase/server"
+import { createUserClient} from "@/utils/supabase/server"
 import { NextRequest, NextResponse } from "next/server"
 import * as console from "node:console";
 
@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
 
 
   if (code) {
-    const supabase = await createClient()
+    const supabase = await createUserClient()
     const { error } = await supabase.auth.exchangeCodeForSession(code)
     if (!error) {
       // If user should install the GitHub app after auth

@@ -9,6 +9,7 @@ interface ConnectGitHubButtonProps {
 
 export default function ConnectGitHubButton({ className }: ConnectGitHubButtonProps) {
   const handleInstallApp = () => {
+    // GitHub will redirect to the Setup URL configured in the app settings
     const installUrl = `https://github.com/apps/cycloneai/installations/new`
     window.location.href = installUrl
   }

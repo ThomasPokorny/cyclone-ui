@@ -2,7 +2,7 @@
 
 
 import { revalidatePath } from "next/cache"
-import { createClient } from "@/utils/supabase/server"
+import { getAdminClient } from "@/utils/supabase/server"
 
 export async function addToWaitlist(formData: FormData) {
   const email = formData.get("email") as string
@@ -16,7 +16,7 @@ export async function addToWaitlist(formData: FormData) {
   }
 
   try {
-    const supabase = await createClient()
+    const supabase =  getAdminClient()
 
     const { data, error } = await supabase
       .from("waitlist")

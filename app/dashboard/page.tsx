@@ -1,10 +1,10 @@
-import { createClient } from "@/utils/supabase/server"
+import { createUserClient } from "@/utils/supabase/server"
 import { redirect } from "next/navigation"
 import ConnectGitHubButton from "@/components/ConnectGitHubButton"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 export default async function Dashboard() {
-  const supabase = await createClient()
+  const supabase = await createUserClient()
   
   const { data: { user } } = await supabase.auth.getUser()
   

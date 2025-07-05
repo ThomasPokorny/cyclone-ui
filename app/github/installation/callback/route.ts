@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
+import { saveInstallation } from "../../../actions/github";
 
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url)
@@ -14,11 +15,16 @@ export async function GET(request: NextRequest) {
     console.log("✅ GitHub App successfully installed!")
     console.log("Installation ID to store:", installationId)
     
-    // TODO: Store installation ID in database associated with user
-    // const supabase = await createClient()
-    // Store installationId with current user
+    // Save installation ID to database
+    const result = await saveInstallation(installationId)
     
-    // Redirect to dashboard or success page
+    if (result.success) {
+      console.log("✅ Installation ID saved to database")
+    } else {
+      console.error("❌ Failed to save installation ID:", result.error)
+    }
+    
+    // Redirect to dashboard
     return NextResponse.redirect(`${origin}/dashboard?installation_success=true`)
   }
   
