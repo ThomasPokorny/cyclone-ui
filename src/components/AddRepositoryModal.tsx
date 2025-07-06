@@ -69,26 +69,29 @@ const AddRepositoryModal = ({ open, onOpenChange, onAddRepository }: AddReposito
             />
           </div>
           
-          <div className="space-y-3">
-            <Label>Review Strength</Label>
-            <RadioGroup value={reviewStrength} onValueChange={setReviewStrength}>
+          <div className="space-y-3 opacity-50">
+            <div className="flex items-center justify-between">
+              <Label>Review Strength</Label>
+              <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded">Coming Soon</span>
+            </div>
+            <RadioGroup value={reviewStrength} onValueChange={setReviewStrength} disabled>
               <div className="flex items-center space-x-2">
-                <RadioGroupItem value="balanced" id="balanced" />
-                <Label htmlFor="balanced" className="cursor-pointer">
+                <RadioGroupItem value="balanced" id="balanced" disabled />
+                <Label htmlFor="balanced" className="cursor-not-allowed">
                   <div className="font-medium">Balanced</div>
                   <div className="text-sm text-muted-foreground">Standard code review depth</div>
                 </Label>
               </div>
               <div className="flex items-center space-x-2">
-                <RadioGroupItem value="thorough" id="thorough" />
-                <Label htmlFor="thorough" className="cursor-pointer">
+                <RadioGroupItem value="thorough" id="thorough" disabled />
+                <Label htmlFor="thorough" className="cursor-not-allowed">
                   <div className="font-medium">Thorough</div>
                   <div className="text-sm text-muted-foreground">Comprehensive analysis with detailed feedback</div>
                 </Label>
               </div>
               <div className="flex items-center space-x-2">
-                <RadioGroupItem value="strict" id="strict" />
-                <Label htmlFor="strict" className="cursor-pointer">
+                <RadioGroupItem value="strict" id="strict" disabled />
+                <Label htmlFor="strict" className="cursor-not-allowed">
                   <div className="font-medium">Strict</div>
                   <div className="text-sm text-muted-foreground">Rigorous standards with strict compliance checks</div>
                 </Label>
