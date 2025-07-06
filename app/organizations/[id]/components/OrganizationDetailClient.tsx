@@ -37,13 +37,8 @@ export default function OrganizationDetailClient({ organizationId, organization,
   // Mock members count - in real app would fetch from database
   const membersCount = 12;
 
-  const handleAddRepository = (name: string, reviewStrength: string, customPrompt: string) => {
-    const newRepo: Repository = {
-      id: Date.now().toString(),
-      name,
-      custom_prompt: customPrompt,
-    };
-    setRepositories([...repositories, newRepo]);
+  const handleAddRepository = () => {
+    // The modal will handle the refresh via window.location.reload()
   };
 
   const handleEditRepository = (repository: Repository) => {
@@ -176,6 +171,7 @@ export default function OrganizationDetailClient({ organizationId, organization,
       <AddRepositoryModal
         open={isAddModalOpen}
         onOpenChange={setIsAddModalOpen}
+        organizationId={organizationId}
         onAddRepository={handleAddRepository}
       />
 

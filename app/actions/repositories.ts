@@ -164,3 +164,81 @@ export async function updateRepository(repositoryId: string, name: string, custo
     }
   }
 }
+
+export async function createRepository(organizationId: string, name: string, customPrompt: string) {
+  try {
+    const authSupabase = await createUserClient()
+    const supabase = getAdminClient()
+    
+    // Get current user
+    const { data: { user }, error: userError } = await authSupabase.auth.getUser()
+    
+    if (userError || !user) {
+      console.error("Failed to get user:", userError)
+      return {
+        success: false,
+        error: "User not authenticated",
+      }
+    }
+
+    // Verify the user has access to this organization
+    console.log("🔐 Checking user access to organization:", organizationId)
+    
+    const organizationsResult = await getOrganizations()
+    
+    if (!organizationsResult.success || !organizationsResult.data) {
+      console.error("No organizations found for user:", user.id)
+      return {
+        success: false,
+        error: "No organizations found or access denied",
+      }
+    }
+
+    // Check if the organization ID is in the user's list of organizations
+    const hasAccess = organizationsResult.data.some((org: any) => org.id === Number.parseInt(organizationId))
+    
+    if (!hasAccess) {
+      console.error("User does not have access to organization:", organizationId)
+      return {
+        success: false,
+        error: "Access denied to this organization",
+      }
+    }
+
+    console.log("✅ User has access, creating repository in organization:", organizationId)
+
+    // Create the repository
+    const { data, error } = await supabase
+      .from("repository")
+      .insert([
+        {
+          name: name,
+          custom_prompt: customPrompt,
+          organization_id: organizationId,
+        },
+      ])
+      .select()
+
+    if (error) {
+      console.error("Supabase error:", error)
+      return {
+        success: false,
+        error: "Failed to create repository",
+      }
+    }
+
+    console.log("✅ Repository created successfully:", data)
+
+    return {
+      success: true,
+      data: data[0],
+      message: "Repository created successfully!",
+    }
+  } catch (error) {
+    console.error("Server error:", error)
+    return {
+      success: false,
+      error: "An unexpected error occurred. Please try again.",
+    }
+  }
+}

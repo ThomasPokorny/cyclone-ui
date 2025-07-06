@@ -6,43 +6,68 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { GitBranch } from "lucide-react";
+import { GitBranch, Loader2, CheckCircle } from "lucide-react";
+import { createRepository } from "@/app/actions/repositories";
 
 interface AddRepositoryModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onAddRepository: (name: string, reviewStrength: string, customPrompt: string) => void;
+  organizationId: string;
+  onAddRepository?: () => void;
 }
 
-const AddRepositoryModal = ({ open, onOpenChange, onAddRepository }: AddRepositoryModalProps) => {
+const AddRepositoryModal = ({ open, onOpenChange, organizationId, onAddRepository }: AddRepositoryModalProps) => {
   const [name, setName] = useState("");
   const [reviewStrength, setReviewStrength] = useState("balanced");
   const [customPrompt, setCustomPrompt] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) return;
     
     setIsSubmitting(true);
+    setError("");
     
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    onAddRepository(name.trim(), reviewStrength, customPrompt.trim());
-    
-    // Reset form
-    setName("");
-    setReviewStrength("balanced");
-    setCustomPrompt("");
-    setIsSubmitting(false);
-    onOpenChange(false);
+    try {
+      const result = await createRepository(organizationId, name.trim(), customPrompt.trim());
+      
+      if (result.success) {
+        // Show success message
+        setSuccess(true);
+        
+        // Close modal and refresh after showing success
+        setTimeout(() => {
+          setName("");
+          setCustomPrompt("");
+          setSuccess(false);
+          onOpenChange(false);
+          
+          // Callback to refresh the repositories list
+          if (onAddRepository) {
+            onAddRepository();
+          }
+          
+          window.location.reload();
+        }, 1500);
+      } else {
+        setError(result.error || "Failed to create repository");
+      }
+    } catch (err) {
+      setError("An unexpected error occurred");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleCancel = () => {
     setName("");
     setReviewStrength("balanced");
     setCustomPrompt("");
+    setError("");
+    setSuccess(false);
     onOpenChange(false);
   };
 
@@ -109,6 +134,19 @@ const AddRepositoryModal = ({ open, onOpenChange, onAddRepository }: AddReposito
               rows={3}
             />
           </div>
+
+          {error && (
+            <div className="text-sm text-red-500 bg-red-50 p-3 rounded-md">
+              {error}
+            </div>
+          )}
+
+          {success && (
+            <div className="text-sm text-green-500 bg-green-50 p-3 rounded-md flex items-center gap-2">
+              <CheckCircle className="w-4 h-4" />
+              Repository created successfully!
+            </div>
+          )}
           
           <div className="flex gap-3 justify-end pt-4">
             <Button 
@@ -124,7 +162,14 @@ const AddRepositoryModal = ({ open, onOpenChange, onAddRepository }: AddReposito
               className="bg-primary hover:bg-primary/90" 
               disabled={!name.trim() || isSubmitting}
             >
-              {isSubmitting ? "Adding..." : "Add Repository"}
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Adding...
+                </>
+              ) : (
+                "Add Repository"
+              )}
             </Button>
           </div>
         </form>
