@@ -74,6 +74,92 @@ export async function getRepositoriesByOrganizationId(organizationId: string) {
   }
 }
 
+export async function deleteRepository(repositoryId: string) {
+  try {
+    const authSupabase = await createUserClient()
+    const supabase = getAdminClient()
+    
+    // Get current user
+    const { data: { user }, error: userError } = await authSupabase.auth.getUser()
+    
+    if (userError || !user) {
+      console.error("Failed to get user:", userError)
+      return {
+        success: false,
+        error: "User not authenticated",
+      }
+    }
+
+    // First, get the repository to check if it exists and get its organization_id
+    const { data: repository, error: fetchError } = await supabase
+      .from("repository")
+      .select("id, organization_id")
+      .eq("id", repositoryId)
+      .single()
+
+    if (fetchError || !repository) {
+      console.error("Repository not found:", fetchError)
+      return {
+        success: false,
+        error: "Repository not found",
+      }
+    }
+
+    // Verify the user has access to this repository's organization
+    console.log("🔐 Checking user access to repository's organization:", repository.organization_id)
+    
+    const organizationsResult = await getOrganizations()
+    
+    if (!organizationsResult.success || !organizationsResult.data) {
+      console.error("No organizations found for user:", user.id)
+      return {
+        success: false,
+        error: "No organizations found or access denied",
+      }
+    }
+
+    // Check if the organization ID is in the user's list of organizations
+    const hasAccess = organizationsResult.data.some((org: any) => org.id === Number.parseInt(repository.organization_id))
+    
+    if (!hasAccess) {
+      console.error("User does not have access to repository's organization:", repository.organization_id)
+      return {
+        success: false,
+        error: "Access denied to this repository",
+      }
+    }
+
+    console.log("✅ User has access, deleting repository:", repositoryId)
+
+    // Delete the repository
+    const { error } = await supabase
+      .from("repository")
+      .delete()
+      .eq("id", repositoryId)
+
+    if (error) {
+      console.error("Supabase error:", error)
+      return {
+        success: false,
+        error: "Failed to delete repository",
+      }
+    }
+
+    console.log("✅ Repository deleted successfully:", repositoryId)
+
+    return {
+      success: true,
+      message: "Repository deleted successfully!",
+    }
+  } catch (error) {
+    console.error("Server error:", error)
+    return {
+      success: false,
+      error: "An unexpected error occurred. Please try again.",
+    }
+  }
+}
+
 export async function updateRepository(repositoryId: string, name: string, customPrompt: string) {
   try {
     const authSupabase = await createUserClient()
@@ -215,6 +301,7 @@ export async function createRepository(organizationId: string, name: string, cus
           name: name,
           custom_prompt: customPrompt,
           organization_id: organizationId,
+          precision: 'minor'
         },
       ])
       .select()

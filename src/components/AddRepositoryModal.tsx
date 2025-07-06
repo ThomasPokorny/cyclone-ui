@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { GitBranch, Loader2, CheckCircle } from "lucide-react";
-import { createRepository } from "@/app/actions/repositories";
+import { createRepository } from "../../app/actions/repositories";
 
 interface AddRepositoryModalProps {
   open: boolean;
@@ -51,7 +51,7 @@ const AddRepositoryModal = ({ open, onOpenChange, organizationId, onAddRepositor
           }
           
           window.location.reload();
-        }, 1500);
+        }, 500);
       } else {
         setError(result.error || "Failed to create repository");
       }
@@ -168,7 +168,7 @@ const AddRepositoryModal = ({ open, onOpenChange, organizationId, onAddRepositor
                   Adding...
                 </>
               ) : (
-                "Add Repository"
+                "Link Repository"
               )}
             </Button>
           </div>

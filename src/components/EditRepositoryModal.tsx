@@ -5,8 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { GitBranch, Loader2, CheckCircle } from "lucide-react";
-import { updateRepository } from "../../app/actions/repositories";
+import { GitBranch, Loader2, CheckCircle, Trash2 } from "lucide-react";
+import { updateRepository, deleteRepository } from "../../app/actions/repositories";
 
 interface Repository {
   id: string;
@@ -26,6 +26,7 @@ const EditRepositoryModal = ({ open, onOpenChange, repository, onUpdateRepositor
   const [reviewStrength, setReviewStrength] = useState("balanced");
   const [customPrompt, setCustomPrompt] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
 
@@ -64,7 +65,7 @@ const EditRepositoryModal = ({ open, onOpenChange, repository, onUpdateRepositor
           }
           
           window.location.reload();
-        }, 1500);
+        }, 200);
       } else {
         setError(result.error || "Failed to update repository");
       }
@@ -75,12 +76,48 @@ const EditRepositoryModal = ({ open, onOpenChange, repository, onUpdateRepositor
     }
   };
 
+  const handleDelete = async () => {
+    if (!repository || !window.confirm(`Are you sure you want to delete "${repository.name}"? This action cannot be undone.`)) {
+      return;
+    }
+    
+    setIsDeleting(true);
+    setError("");
+    
+    try {
+      const result = await deleteRepository(repository.id);
+      
+      if (result.success) {
+        // Show success and close modal
+        setSuccess(true);
+        
+        setTimeout(() => {
+          setSuccess(false);
+          onOpenChange(false);
+          
+          if (onUpdateRepository) {
+            onUpdateRepository();
+          }
+          
+          window.location.reload();
+        }, 300);
+      } else {
+        setError(result.error || "Failed to delete repository");
+      }
+    } catch (err) {
+      setError("An unexpected error occurred");
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   const handleCancel = () => {
     setName("");
     setReviewStrength("balanced");
     setCustomPrompt("");
     setError("");
     setSuccess(false);
+    setIsDeleting(false);
     onOpenChange(false);
   };
 
@@ -161,29 +198,51 @@ const EditRepositoryModal = ({ open, onOpenChange, repository, onUpdateRepositor
             </div>
           )}
           
-          <div className="flex gap-3 justify-end pt-4">
+          <div className="flex justify-between pt-4">
             <Button 
               type="button" 
-              variant="outline" 
-              onClick={handleCancel}
-              disabled={isSubmitting}
+              variant="destructive" 
+              onClick={handleDelete}
+              disabled={isSubmitting || isDeleting}
+              className="bg-red-500 hover:bg-red-600"
             >
-              Cancel
-            </Button>
-            <Button 
-              type="submit" 
-              className="bg-primary hover:bg-primary/90" 
-              disabled={!name.trim() || isSubmitting}
-            >
-              {isSubmitting ? (
+              {isDeleting ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Updating...
+                  Unlinking...
                 </>
               ) : (
-                "Update Repository"
+                <>
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Unlink
+                </>
               )}
             </Button>
+            
+            <div className="flex gap-3">
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={handleCancel}
+                disabled={isSubmitting || isDeleting}
+              >
+                Cancel
+              </Button>
+              <Button 
+                type="submit" 
+                className="bg-primary hover:bg-primary/90" 
+                disabled={!name.trim() || isSubmitting || isDeleting}
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Updating...
+                  </>
+                ) : (
+                  "Update Repository"
+                )}
+              </Button>
+            </div>
           </div>
         </form>
       </DialogContent>

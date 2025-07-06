@@ -12,6 +12,7 @@ interface OrganizationDetailProps {
 }
 
 export default async function OrganizationDetail({ params }: OrganizationDetailProps) {
+  const resolvedParams = await params;
   const supabase = await createUserClient();
   const { data: { user } } = await supabase.auth.getUser();
   
@@ -20,20 +21,20 @@ export default async function OrganizationDetail({ params }: OrganizationDetailP
   }
 
   // Fetch organization data
-  const organizationResult = await getOrganizationById(params.id);
+  const organizationResult = await getOrganizationById(resolvedParams.id);
   
   if (!organizationResult.success || !organizationResult.data) {
     redirect("/dashboard");
   }
 
   // Fetch repositories for this organization
-  const repositoriesResult = await getRepositoriesByOrganizationId(params.id);
+  const repositoriesResult = await getRepositoriesByOrganizationId(resolvedParams.id);
 
   return (
     <div className="min-h-screen bg-background">
       <Header supabaseUser={user} />
       <OrganizationDetailClient 
-        organizationId={params.id} 
+        organizationId={resolvedParams.id} 
         organization={organizationResult.data}
         repositories={repositoriesResult.success ? repositoriesResult.data : []}
       />

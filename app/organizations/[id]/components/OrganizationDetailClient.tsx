@@ -78,7 +78,7 @@ export default function OrganizationDetailClient({ organizationId, organization,
             </Button>
             <Button onClick={() => setIsAddModalOpen(true)} className="bg-primary hover:bg-primary/90">
               <Plus className="w-4 h-4 mr-2" />
-              Add Repository
+              Link Repository
             </Button>
           </div>
         </div>
