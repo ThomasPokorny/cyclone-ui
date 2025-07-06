@@ -15,7 +15,7 @@ const HeroSection = ({ onGetEarlyAccess }: HeroSectionProps) => {
         <div className="text-center max-w-4xl mx-auto">
           <Badge variant="secondary" className="mb-6 px-4 py-2 text-sm animate-pulse-slow">
             <Star className="w-4 h-4 mr-2" />
-            Trusted by 500+ development teams
+            Early alpha accessible - accelerate your code reviews
           </Badge>
           <h1 className="text-5xl lg:text-7xl font-bold mb-6 leading-tight">
             AI-Powered

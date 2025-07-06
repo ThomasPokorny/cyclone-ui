@@ -1,7 +1,7 @@
 'use client'
 
 import {useState} from "react";
-import {ArrowRight, Building2, Shield, Users, Zap} from "lucide-react";
+import {ArrowRight, Building2, Users, Zap, FileSearch} from "lucide-react";
 import {Card, CardContent, CardDescription, CardHeader, CardTitle} from "@/components/ui/card";
 import {Label} from "@/components/ui/label";
 import {Input} from "@/components/ui/input";
@@ -45,9 +45,9 @@ export default function CreateFirstOrganization() {
             description: "Invite team members and collaborate on code reviews seamlessly"
         },
         {
-            icon: Shield,
-            title: "Enterprise Security",
-            description: "Advanced security features to protect your organization's code"
+            icon: FileSearch,
+            title: "Smart Code Analysis",
+            description: "Deep code inspection with pattern detection and best practices enforcement"
         },
         {
             icon: Zap,
