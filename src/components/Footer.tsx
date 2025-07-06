@@ -17,7 +17,7 @@ const Footer = () => {
               <Github className="w-4 h-4" />
               GitHub
             </a>
-            <span className="text-sm">© 2024 Cyclone AI. All rights reserved.</span>
+            <span className="text-sm">© 2025 Cyclone AI. All rights reserved.</span>
           </div>
         </div>
       </div>
