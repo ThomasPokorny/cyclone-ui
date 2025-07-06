@@ -15,18 +15,28 @@ const Navigation = ({ onGetEarlyAccess }: NavigationProps) => {
         <div className="flex items-center justify-between">
           <Link href="/" className="flex items-center space-x-2 hover:opacity-80 transition-opacity">
             <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gradient-to-br from-primary to-accent rounded-lg flex items-center justify-center">
+              <div
+                  className="w-8 h-8 bg-gradient-to-br from-primary to-accent rounded-lg flex items-center justify-center">
                 <span className="text-background font-bold text-lg">🌪️</span>
               </div>
               <span className="font-bold text-xl text-gradient">Cyclone AI</span>
             </div>
           </Link>
 
+          <div className="hidden md:flex items-center space-x-8">
+            <a href="#features" className="text-muted-foreground hover:text-foreground transition-colors">Features</a>
+            <a href="#pricing" className="text-muted-foreground hover:text-foreground transition-colors">Pricing</a>
+            <a href="https://github.com/ThomasPokorny/cyclone-ai" target="_blank" rel="noopener noreferrer"
+               className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2">
+              <Github className="w-4 h-4"/>
+              GitHub
+            </a>
+          </div>
+
           <div className="flex items-center gap-4">
-            <SignInButton redirectTo="/dashboard" className="size-sm" />
             <Button size="sm" className="bg-primary hover:bg-primary/90" onClick={onGetEarlyAccess}>
               Get Early Access
-              <ArrowRight className="w-4 h-4 ml-2" />
+              <ArrowRight className="w-4 h-4 ml-2"/>
             </Button>
           </div>
         </div>
@@ -38,7 +48,7 @@ const Navigation = ({ onGetEarlyAccess }: NavigationProps) => {
 export default Navigation;
 
 /*
-
+ <SignInButton redirectTo="/dashboard" className="size-sm"/>
           <div className="hidden md:flex items-center space-x-8">
             <a href="#features" className="text-muted-foreground hover:text-foreground transition-colors">Features</a>
             <a href="#pricing" className="text-muted-foreground hover:text-foreground transition-colors">Pricing</a>
