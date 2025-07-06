@@ -4,6 +4,75 @@ import { getAdminClient, createUserClient } from "@/utils/supabase/server"
 import { getOrganizations } from "./organization"
 import { getInstallationByUserId } from "./github"
 
+export async function getTotalRepositoryCount() {
+  try {
+    const authSupabase = await createUserClient()
+    const supabase = getAdminClient()
+    
+    // Get current user
+    const { data: { user }, error: userError } = await authSupabase.auth.getUser()
+    
+    if (userError || !user) {
+      console.error("Failed to get user:", userError)
+      return {
+        success: false,
+        error: "User not authenticated",
+        count: 0,
+      }
+    }
+
+    // Get user's organizations first
+    const organizationsResult = await getOrganizations()
+    
+    if (!organizationsResult.success || !organizationsResult.data) {
+      console.error("No organizations found for user:", user.id)
+      return {
+        success: true,
+        count: 0,
+      }
+    }
+
+    // Get organization IDs
+    const organizationIds = organizationsResult.data.map((org: any) => org.id)
+
+    if (organizationIds.length === 0) {
+      return {
+        success: true,
+        count: 0,
+      }
+    }
+
+    // Count repositories across all user's organizations
+    const { count, error } = await supabase
+      .from("repository")
+      .select("*", { count: 'exact', head: true })
+      .in("organization_id", organizationIds)
+
+    if (error) {
+      console.error("Supabase error:", error)
+      return {
+        success: false,
+        error: "Failed to count repositories",
+        count: 0,
+      }
+    }
+
+    console.log("✅ Total repositories count:", count || 0)
+
+    return {
+      success: true,
+      count: count || 0,
+    }
+  } catch (error) {
+    console.error("Server error:", error)
+    return {
+      success: false,
+      error: "An unexpected error occurred. Please try again.",
+      count: 0,
+    }
+  }
+}
+
 export async function getRepositoriesByOrganizationId(organizationId: string) {
   try {
     const authSupabase = await createUserClient()

@@ -4,6 +4,7 @@ import Header from "@/components/Header"
 import DashboardWelcome from "./components/DashboardWelcome"
 import { getInstallationByUserId } from "../actions/github"
 import { getOrganizations } from "../actions/organization"
+import { getTotalRepositoryCount } from "../actions/repositories"
 import CreateFirstOrganization from "./components/CreateFirstOrganization"
 import DashboardOrganizations from "./components/DashboardOrganizations";
 
@@ -21,10 +22,17 @@ export default async function Dashboard() {
   
   // If installation exists, check for organizations
   let organizations = []
+  let totalRepositories = 0
   if (hasInstallation) {
     const organizationsResult = await getOrganizations()
     if (organizationsResult.success && organizationsResult.data) {
       organizations = organizationsResult.data
+      
+      // Get total repository count across all organizations
+      const repositoryCountResult = await getTotalRepositoryCount()
+      if (repositoryCountResult.success) {
+        totalRepositories = repositoryCountResult.count
+      }
     }
   }
 
@@ -36,7 +44,7 @@ export default async function Dashboard() {
         ) : organizations.length === 0 ? (
           <CreateFirstOrganization />
         ) : (
-          <DashboardOrganizations organizations={organizations} />
+          <DashboardOrganizations organizations={organizations} totalRepositories={totalRepositories} />
         )}
       </div>
   )

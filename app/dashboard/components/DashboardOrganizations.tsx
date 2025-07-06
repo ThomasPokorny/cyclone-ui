@@ -17,9 +17,10 @@ interface Organization {
 
 interface DashboardOrganizationsProps {
   organizations: Organization[];
+  totalRepositories: number;
 }
 
-export default function DashboardOrganizations({ organizations }: DashboardOrganizationsProps) {
+export default function DashboardOrganizations({ organizations, totalRepositories }: DashboardOrganizationsProps) {
   const [greeting, setGreeting] = useState(getRandomGreeting());
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
@@ -59,9 +60,9 @@ export default function DashboardOrganizations({ organizations }: DashboardOrgan
             <Github className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">0</div>
+            <div className="text-2xl font-bold">{totalRepositories}</div>
             <p className="text-xs text-muted-foreground">
-              Waiting for GitHub App
+              {totalRepositories === 0 ? "No repositories linked yet" : "Linked repositories"}
             </p>
           </CardContent>
         </Card>
