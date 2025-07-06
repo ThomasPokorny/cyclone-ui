@@ -1,7 +1,7 @@
 'use client'
 
 import { useSearchParams, useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { validateAndClaimInvitation } from '../actions/invitation'
 import Navigation from "@/components/Navigation";
 import {Card, CardContent, CardDescription, CardHeader, CardTitle} from "@/components/ui/card";
@@ -10,7 +10,7 @@ import SignInButton from "@/components/SignInButton";
 import Link from "next/link";
 import {ArrowRight, Github} from "lucide-react";
 
-export default function InvitePage() {
+function InvitePageContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const [isValidating, setIsValidating] = useState(true)
@@ -144,5 +144,20 @@ export default function InvitePage() {
           </div>
         </div>
       </div>
+  )
+}
+
+export default function InvitePage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    }>
+      <InvitePageContent />
+    </Suspense>
   )
 }
