@@ -1,7 +1,8 @@
 'use client'
 
-import { useSearchParams } from 'next/navigation'
-import { useEffect } from 'react'
+import { useSearchParams, useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
+import { validateAndClaimInvitation } from '../actions/invitation'
 import Navigation from "@/components/Navigation";
 import {Card, CardContent, CardDescription, CardHeader, CardTitle} from "@/components/ui/card";
 import {Button} from "react-day-picker";
@@ -11,13 +12,57 @@ import {ArrowRight, Github} from "lucide-react";
 
 export default function InvitePage() {
   const searchParams = useSearchParams()
+  const router = useRouter()
+  const [isValidating, setIsValidating] = useState(true)
+  const [isValidInvite, setIsValidInvite] = useState(false)
   
   useEffect(() => {
     const inviteKey = searchParams.get('inviteKey')
-    if (inviteKey) {
-      console.log('Invite key:', inviteKey)
+    
+    const validateInvite = async () => {
+      if (!inviteKey) {
+        console.log('❌ No invite key provided')
+        router.push('/')
+        return
+      }
+
+      console.log('🔍 Validating invite key:', inviteKey)
+      
+      try {
+        const result = await validateAndClaimInvitation(inviteKey)
+        
+        if (result.success) {
+          console.log('✅ Invite key is valid and claimed')
+          setIsValidInvite(true)
+        } else {
+          console.log('❌ Invalid invite key, redirecting...')
+          router.push('/')
+        }
+      } catch (error) {
+        console.error('Error validating invite:', error)
+        router.push('/')
+      } finally {
+        setIsValidating(false)
+      }
     }
-  }, [searchParams])
+
+    validateInvite()
+  }, [searchParams, router])
+
+  if (isValidating) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Validating your invitation...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (!isValidInvite) {
+    return null // This should not render as router.push('/') should redirect
+  }
 
   return (
       <div className="min-h-screen bg-background">
