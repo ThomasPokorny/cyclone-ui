@@ -235,34 +235,3 @@ npm run type-check
 # Linting
 npm run lint
 ```
-
-## ⚡ Next Steps
-
-- [ ] **Real-time Updates**: WebSocket integration for live review status
-- [ ] **Team Management**: Advanced user roles and permissions
-- [ ] **Analytics Dashboard**: Detailed review metrics and insights
-- [ ] **Custom Themes**: Dark/light mode and branded themes
-- [ ] **API Documentation**: Generated docs for public API endpoints
-- [ ] **Mobile App**: React Native app for mobile access
-- [ ] **Slack Integration**: Review notifications in team channels
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Make your changes and test thoroughly
-4. Ensure TypeScript compiles without errors
-5. Test with real GitHub repositories
-6. Commit your changes (`git commit -m 'Add amazing feature'`)
-7. Push to the branch (`git push origin feature/amazing-feature`)
-8. Submit a pull request
-
-## 📄 License
-
-This project is part of the Cyclone AI ecosystem. See the main [Cyclone AI repository](https://github.com/ThomasPokorny/cyclone-ai) for license information.
-
-**Built with ❤️ by Thomas Pokorny** 🌪️
-
----
-
-*Part of the Cyclone AI ecosystem - AI-powered code reviews that make your development workflow feel like a breeze!* 🌪️
