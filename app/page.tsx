@@ -9,6 +9,7 @@ import FeaturesSection from "@/components/FeaturesSection";
 import IntegrationSection from "@/components/IntegrationSection";
 import CTASection from "@/components/CTASection";
 import Footer from "@/components/Footer";
+import PowersSection from "@/components/PowerSection";
 
 export default function Home() {
   const [isWaitlistOpen, setIsWaitlistOpen] = useState(false);
@@ -21,6 +22,7 @@ export default function Home() {
     <div className="min-h-screen bg-background">
       <Navigation onGetEarlyAccess={handleGetEarlyAccess} />
       <HeroSection onGetEarlyAccess={handleGetEarlyAccess} />
+      <PowersSection />
       <FeaturesSection />
       <IntegrationSection />
       <CTASection onGetEarlyAccess={handleGetEarlyAccess} />
