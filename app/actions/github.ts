@@ -79,7 +79,6 @@ export async function getInstallationByUserId() {
       .single()
 
     if (error) {
-      console.error("Supabase error:", error)
       return {
         success: false,
         error: "Failed to get installation",
