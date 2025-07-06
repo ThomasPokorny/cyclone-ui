@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Plus, GitBranch, Calendar, Settings, ArrowLeft, MoreHorizontal } from "lucide-react";
+import {Plus, GitBranch, Calendar, Settings, ArrowLeft, MoreHorizontal, CheckCircle} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -11,76 +11,58 @@ import AddRepositoryModal from "@/components/AddRepositoryModal";
 interface Repository {
   id: string;
   name: string;
-  reviewStrength: string;
   customPrompt: string;
-  lastActivity: string;
   status: "active" | "inactive";
+}
+
+interface Organization {
+  id: string;
+  name: string;
+  description: string;
+  installation_id: string;
 }
 
 interface OrganizationDetailClientProps {
   organizationId: string;
+  organization: Organization;
 }
 
-export default function OrganizationDetailClient({ organizationId }: OrganizationDetailClientProps) {
+export default function OrganizationDetailClient({ organizationId, organization }: OrganizationDetailClientProps) {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [repositories, setRepositories] = useState<Repository[]>([
     {
       id: "1",
       name: "frontend-app",
-      reviewStrength: "thorough",
       customPrompt: "Focus on React best practices and accessibility",
-      lastActivity: "2024-01-20",
       status: "active"
     },
     {
       id: "2", 
       name: "api-backend",
-      reviewStrength: "strict",
       customPrompt: "Emphasize security and performance",
-      lastActivity: "2024-01-18",
       status: "active"
     },
     {
       id: "3",
       name: "mobile-client",
-      reviewStrength: "balanced",
       customPrompt: "",
-      lastActivity: "2024-01-15",
       status: "inactive"
     }
   ]);
 
-  // Mock organization data - in real app would fetch based on organizationId
-  const organization = {
-    name: "TechCorp Inc.",
-    description: "Main development team for enterprise applications",
-    members: 12
-  };
+  // Mock members count - in real app would fetch from database
+  const membersCount = 12;
 
   const handleAddRepository = (name: string, reviewStrength: string, customPrompt: string) => {
     const newRepo: Repository = {
       id: Date.now().toString(),
       name,
-      reviewStrength,
       customPrompt,
-      lastActivity: new Date().toISOString().split('T')[0],
       status: "active"
     };
     setRepositories([...repositories, newRepo]);
   };
 
-  const getReviewStrengthColor = (strength: string) => {
-    switch (strength) {
-      case "balanced":
-        return "bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400";
-      case "thorough":
-        return "bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-400";
-      case "strict":
-        return "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400";
-      default:
-        return "bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400";
-    }
-  };
 
   return (
     <div className="p-6">
@@ -113,7 +95,7 @@ export default function OrganizationDetailClient({ organizationId }: Organizatio
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total Repositories</CardTitle>
@@ -126,29 +108,16 @@ export default function OrganizationDetailClient({ organizationId }: Organizatio
               </p>
             </CardContent>
           </Card>
-          
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Active Reviews</CardTitle>
-              <Calendar className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">7</div>
-              <p className="text-xs text-muted-foreground">
-                2 pending approval
-              </p>
-            </CardContent>
-          </Card>
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Team Members</CardTitle>
-              <Settings className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-sm font-medium">Code Reviews</CardTitle>
+              <CheckCircle className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{organization.members}</div>
+              <div className="text-2xl font-bold">0</div>
               <p className="text-xs text-muted-foreground">
-                All with access
+                Ready to start
               </p>
             </CardContent>
           </Card>
@@ -179,9 +148,7 @@ export default function OrganizationDetailClient({ organizationId }: Organizatio
                 <TableHeader>
                   <TableRow>
                     <TableHead>Name</TableHead>
-                    <TableHead>Review Strength</TableHead>
                     <TableHead>Custom Prompt</TableHead>
-                    <TableHead>Last Activity</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead className="w-[50px]"></TableHead>
                   </TableRow>
@@ -190,15 +157,9 @@ export default function OrganizationDetailClient({ organizationId }: Organizatio
                   {repositories.map((repo) => (
                     <TableRow key={repo.id}>
                       <TableCell className="font-medium">{repo.name}</TableCell>
-                      <TableCell>
-                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getReviewStrengthColor(repo.reviewStrength)}`}>
-                          {repo.reviewStrength}
-                        </span>
-                      </TableCell>
                       <TableCell className="text-muted-foreground max-w-xs truncate">
                         {repo.customPrompt || "None"}
                       </TableCell>
-                      <TableCell>{repo.lastActivity}</TableCell>
                       <TableCell>
                         <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
                           repo.status === "active" 

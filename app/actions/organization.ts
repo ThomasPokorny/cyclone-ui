@@ -123,3 +123,62 @@ export async function getOrganizations() {
     }
   }
 }
+
+export async function getOrganizationById(organizationId: string) {
+  try {
+    const authSupabase = await createUserClient()
+    const supabase = getAdminClient()
+    
+    // Get current user
+    const { data: { user }, error: userError } = await authSupabase.auth.getUser()
+    
+    if (userError || !user) {
+      console.error("Failed to get user:", userError)
+      return {
+        success: false,
+        error: "User not authenticated",
+      }
+    }
+
+    // Get user's installation first to ensure they have access
+    const installationResult = await getInstallationByUserId()
+    
+    if (!installationResult.success || !installationResult.data) {
+      console.error("No installation found for user:", user.id)
+      return {
+        success: false,
+        error: "No GitHub installation found.",
+      }
+    }
+
+    console.log("🔍 Getting organization:", organizationId, "for installation:", installationResult.data.id)
+
+    const { data, error } = await supabase
+      .from("organization")
+      .select("*")
+      .eq("id", organizationId)
+      .eq("installation_id", installationResult.data.id)
+      .single()
+
+    if (error) {
+      console.error("Supabase error:", error)
+      return {
+        success: false,
+        error: "Organization not found or access denied",
+      }
+    }
+
+    console.log("✅ Organization found:", data)
+
+    return {
+      success: true,
+      data: data,
+    }
+  } catch (error) {
+    console.error("Server error:", error)
+    return {
+      success: false,
+      error: "An unexpected error occurred. Please try again.",
+    }
+  }
+}

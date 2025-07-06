@@ -2,6 +2,7 @@ import { createUserClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 import Header from "@/components/Header";
 import OrganizationDetailClient from "./components/OrganizationDetailClient";
+import { getOrganizationById } from "../../actions/organization";
 
 interface OrganizationDetailProps {
   params: {
@@ -17,10 +18,20 @@ export default async function OrganizationDetail({ params }: OrganizationDetailP
     redirect("/");
   }
 
+  // Fetch organization data
+  const organizationResult = await getOrganizationById(params.id);
+  
+  if (!organizationResult.success || !organizationResult.data) {
+    redirect("/dashboard");
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <Header supabaseUser={user} />
-      <OrganizationDetailClient organizationId={params.id} />
+      <OrganizationDetailClient 
+        organizationId={params.id} 
+        organization={organizationResult.data}
+      />
     </div>
   );
 }
