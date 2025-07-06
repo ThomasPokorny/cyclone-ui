@@ -133,15 +133,15 @@ const EditRepositoryModal = ({ open, onOpenChange, repository, onUpdateRepositor
         
         <form onSubmit={handleSubmit} className="space-y-4 mt-4">
           <div className="space-y-2">
-            <Label htmlFor="repo-name">Repository Name *</Label>
+            <Label htmlFor="repo-name">Repository Name</Label>
             <Input
               id="repo-name"
               type="text"
-              placeholder="Enter repository name"
               value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
+              disabled
+              className="bg-muted text-muted-foreground cursor-not-allowed"
             />
+            <p className="text-xs text-muted-foreground">Repository name cannot be changed</p>
           </div>
           
           <div className="space-y-3 opacity-50">
