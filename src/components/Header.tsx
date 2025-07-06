@@ -1,6 +1,7 @@
 'use client'
 
 import {useState} from "react";
+import Link from "next/link";
 import {User, Settings, HelpCircle, LogOut, Bell, Search} from "lucide-react";
 import {Button} from "@/components/ui/button";
 import {Input} from "@/components/ui/input";
@@ -49,13 +50,13 @@ const Header = ({supabaseUser}: HeaderProps) => {
             <div className="container mx-auto flex h-16 max-w-screen-2xl items-center justify-between px-6">
                 {/* Logo Section */}
                 <div className="flex items-center space-x-4">
-                    <div className="flex items-center space-x-2">
+                    <Link href="/dashboard" className="flex items-center space-x-2 hover:opacity-80 transition-opacity">
                         <div
                             className="w-8 h-8 bg-gradient-to-br from-primary to-accent rounded-lg flex items-center justify-center">
                             <span className="text-background font-bold text-lg">🌪️</span>
                         </div>
                         <span className="font-bold text-xl text-gradient">Cyclone AI</span>
-                    </div>
+                    </Link>
                 </div>
 
                 {/* Search Bar */}
