@@ -1,6 +1,6 @@
 'use client'
 
-import {Building2, Users, Eye, MoreHorizontal, Plus, CheckCircle, Github} from "lucide-react";
+import {MoreHorizontal, Plus, CheckCircle, Github} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -98,22 +98,17 @@ export default function DashboardOrganizations({ organizations }: DashboardOrgan
             </TableHeader>
             <TableBody>
               {organizations.map((org) => (
-                <TableRow key={org.id}>
-                  <TableCell className="font-medium">{org.name}</TableCell>
-                  <TableCell className="text-muted-foreground">{org.description}</TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <Link href={`/organizations/${org.id}`}>
-                        <Button variant="ghost" size="sm">
-                          <Eye className="w-4 h-4" />
-                        </Button>
-                      </Link>
+                <Link key={org.id} href={`/organizations/${org.id}`} className="contents">
+                  <TableRow className="cursor-pointer hover:bg-muted/50">
+                    <TableCell className="font-medium">{org.name}</TableCell>
+                    <TableCell className="text-muted-foreground">{org.description}</TableCell>
+                    <TableCell>
                       <Button variant="ghost" size="sm">
                         <MoreHorizontal className="w-4 h-4" />
                       </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
+                    </TableCell>
+                  </TableRow>
+                </Link>
               ))}
             </TableBody>
           </Table>

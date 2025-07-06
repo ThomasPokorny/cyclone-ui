@@ -6,39 +6,57 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Building2 } from "lucide-react";
+import { createOrganization } from "../../app/actions/organization";
 
 interface AddOrganizationModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onAddOrganization: (name: string, description: string) => void;
+  onAddOrganization?: () => void;
 }
 
 const AddOrganizationModal = ({ open, onOpenChange, onAddOrganization }: AddOrganizationModalProps) => {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) return;
     
     setIsSubmitting(true);
+    setError("");
     
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    onAddOrganization(name.trim(), description.trim());
-    
-    // Reset form
-    setName("");
-    setDescription("");
-    setIsSubmitting(false);
-    onOpenChange(false);
+    try {
+      const result = await createOrganization(name.trim(), description.trim());
+      
+      if (result.success) {
+        // Reset form
+        setName("");
+        setDescription("");
+        onOpenChange(false);
+        
+        // Callback to refresh the organizations list
+        if (onAddOrganization) {
+          onAddOrganization();
+        }
+        
+        // Refresh the page to show the new organization
+        window.location.reload();
+      } else {
+        setError(result.error || "Failed to create organization");
+      }
+    } catch (err) {
+      setError("An unexpected error occurred");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleCancel = () => {
     setName("");
     setDescription("");
+    setError("");
     onOpenChange(false);
   };
 
@@ -75,6 +93,12 @@ const AddOrganizationModal = ({ open, onOpenChange, onAddOrganization }: AddOrga
               rows={3}
             />
           </div>
+          
+          {error && (
+            <div className="text-sm text-red-500 bg-red-50 p-3 rounded-md">
+              {error}
+            </div>
+          )}
           
           <div className="flex gap-3 justify-end pt-4">
             <Button 
