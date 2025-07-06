@@ -1,13 +1,13 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { GitBranch, Loader2, CheckCircle } from "lucide-react";
-import { createRepository } from "../../app/actions/repositories";
+import { createRepository, getAvailableGitHubRepositories } from "../../app/actions/repositories";
 
 interface AddRepositoryModalProps {
   open: boolean;
@@ -16,23 +16,61 @@ interface AddRepositoryModalProps {
   onAddRepository?: () => void;
 }
 
+interface GitHubRepository {
+  id: string;
+  name: string;
+  full_name: string;
+  private: boolean;
+  html_url: string;
+}
+
 const AddRepositoryModal = ({ open, onOpenChange, organizationId, onAddRepository }: AddRepositoryModalProps) => {
-  const [name, setName] = useState("");
+  const [selectedRepository, setSelectedRepository] = useState<string>("");
   const [reviewStrength, setReviewStrength] = useState("balanced");
   const [customPrompt, setCustomPrompt] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
+  const [githubRepos, setGithubRepos] = useState<GitHubRepository[]>([]);
+  const [isLoadingRepos, setIsLoadingRepos] = useState(false);
+
+  useEffect(() => {
+    if (open && organizationId) {
+      loadGitHubRepositories();
+    }
+  }, [open, organizationId]);
+
+  const loadGitHubRepositories = async () => {
+    setIsLoadingRepos(true);
+    setError("");
+    
+    try {
+      const result = await getAvailableGitHubRepositories(organizationId);
+      
+      if (result.success && result.data) {
+        setGithubRepos(result.data);
+      } else {
+        setError(result.error || "Failed to load GitHub repositories");
+      }
+    } catch (err) {
+      setError("Failed to load repositories");
+    } finally {
+      setIsLoadingRepos(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim()) return;
+    if (!selectedRepository) return;
+    
+    const selectedRepo = githubRepos.find(repo => repo.name === selectedRepository);
+    if (!selectedRepo) return;
     
     setIsSubmitting(true);
     setError("");
     
     try {
-      const result = await createRepository(organizationId, name.trim(), customPrompt.trim());
+      const result = await createRepository(organizationId, selectedRepo.name, customPrompt.trim());
       
       if (result.success) {
         // Show success message
@@ -40,7 +78,7 @@ const AddRepositoryModal = ({ open, onOpenChange, organizationId, onAddRepositor
         
         // Close modal and refresh after showing success
         setTimeout(() => {
-          setName("");
+          setSelectedRepository("");
           setCustomPrompt("");
           setSuccess(false);
           onOpenChange(false);
@@ -63,7 +101,7 @@ const AddRepositoryModal = ({ open, onOpenChange, organizationId, onAddRepositor
   };
 
   const handleCancel = () => {
-    setName("");
+    setSelectedRepository("");
     setReviewStrength("balanced");
     setCustomPrompt("");
     setError("");
@@ -83,15 +121,33 @@ const AddRepositoryModal = ({ open, onOpenChange, organizationId, onAddRepositor
         
         <form onSubmit={handleSubmit} className="space-y-4 mt-4">
           <div className="space-y-2">
-            <Label htmlFor="repo-name">Repository Name *</Label>
-            <Input
-              id="repo-name"
-              type="text"
-              placeholder="Enter repository name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-            />
+            <Label htmlFor="repo-select">Select Repository *</Label>
+            {isLoadingRepos ? (
+              <div className="flex items-center gap-2 p-2 text-sm text-muted-foreground">
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Loading repositories...
+              </div>
+            ) : githubRepos.length === 0 ? (
+              <div className="p-2 text-sm text-muted-foreground border rounded-md">
+                No available repositories found. Make sure the Cyclone app has access to your repositories.
+              </div>
+            ) : (
+              <Select value={selectedRepository} onValueChange={setSelectedRepository}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Choose a repository to link" />
+                </SelectTrigger>
+                <SelectContent>
+                  {githubRepos.map((repo) => (
+                    <SelectItem key={repo.id} value={repo.name}>
+                      <div className="flex flex-col">
+                        <span className="font-medium">{repo.name}</span>
+                        <span className="text-xs text-muted-foreground">{repo.full_name}</span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
           </div>
           
           <div className="space-y-3 opacity-50">
@@ -160,12 +216,12 @@ const AddRepositoryModal = ({ open, onOpenChange, organizationId, onAddRepositor
             <Button 
               type="submit" 
               className="bg-primary hover:bg-primary/90" 
-              disabled={!name.trim() || isSubmitting}
+              disabled={!selectedRepository || isSubmitting || isLoadingRepos}
             >
               {isSubmitting ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Adding...
+                  Linking...
                 </>
               ) : (
                 "Link Repository"

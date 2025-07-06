@@ -2,6 +2,7 @@
 
 import { getAdminClient, createUserClient } from "@/utils/supabase/server"
 import { getOrganizations } from "./organization"
+import { getInstallationByUserId } from "./github"
 
 export async function getRepositoriesByOrganizationId(organizationId: string) {
   try {
@@ -327,5 +328,169 @@ export async function createRepository(organizationId: string, name: string, cus
       success: false,
       error: "An unexpected error occurred. Please try again.",
     }
+  }
+}
+
+export async function getAvailableGitHubRepositories(organizationId: string) {
+  try {
+    const authSupabase = await createUserClient()
+    
+    // Get current user
+    const { data: { user }, error: userError } = await authSupabase.auth.getUser()
+    
+    if (userError || !user) {
+      console.error("Failed to get user:", userError)
+      return {
+        success: false,
+        error: "User not authenticated",
+      }
+    }
+
+    // Get user's installation to get the GitHub installation ID
+    const installationResult = await getInstallationByUserId()
+    
+    if (!installationResult.success || !installationResult.data) {
+      console.error("No installation found for user:", user.id)
+      return {
+        success: false,
+        error: "No GitHub installation found.",
+      }
+    }
+
+    const installationId = installationResult.data.installation_id
+
+    console.log("🔍 Fetching GitHub repositories for installation:", installationId)
+
+    // Get GitHub App credentials
+    const githubAppId = process.env.GITHUB_APP_ID
+    const githubPrivateKey = process.env.GITHUB_PRIVATE_KEY?.replace(/\\n/g, '\n')
+    
+    if (!githubAppId || !githubPrivateKey) {
+      console.error("GitHub App credentials not configured")
+      return {
+        success: false,
+        error: "GitHub integration not configured. Please contact support.",
+      }
+    }
+
+    // Create JWT token for GitHub App authentication
+    const jwt = await createGitHubAppJWT(githubAppId, githubPrivateKey)
+    
+    // Get installation access token
+    const installationToken = await getInstallationAccessToken(installationId, jwt)
+    
+    if (!installationToken) {
+      return {
+        success: false,
+        error: "Failed to authenticate with GitHub",
+      }
+    }
+
+    // Fetch repositories from GitHub API
+    const githubRepos = await fetchGitHubRepositories(installationToken)
+    
+    if (!githubRepos) {
+      return {
+        success: false,
+        error: "Failed to fetch repositories from GitHub",
+      }
+    }
+
+    // Get already linked repositories to filter them out
+    const linkedRepos = await getRepositoriesByOrganizationId(organizationId)
+    const linkedRepoNames = linkedRepos.success ? linkedRepos.data.map((repo: any) => repo.name) : []
+
+    // Filter out already linked repositories
+    const availableRepos = githubRepos.filter((repo: any) => !linkedRepoNames.includes(repo.name))
+
+    console.log("✅ Available GitHub repositories:", availableRepos.length, "of", githubRepos.length, "total")
+
+    return {
+      success: true,
+      data: availableRepos,
+    }
+  } catch (error) {
+    console.error("Server error:", error)
+    return {
+      success: false,
+      error: "An unexpected error occurred. Please try again.",
+    }
+  }
+}
+
+async function createGitHubAppJWT(appId: string, privateKey: string) {
+  // Create JWT for GitHub App
+  const jose = await import('jose')
+  const { SignJWT } = jose
+  
+  const now = Math.floor(Date.now() / 1000)
+  
+  const payload = {
+    iat: now - 60, // Issued 60 seconds in the past to allow for clock drift
+    exp: now + (10 * 60), // Expires 10 minutes from now
+    iss: appId, // GitHub App ID
+  }
+
+  const privateKeyObject = await jose.importPKCS8(privateKey, 'RS256')
+  
+  const jwt = await new SignJWT(payload)
+    .setProtectedHeader({ alg: 'RS256' })
+    .sign(privateKeyObject)
+    
+  return jwt
+}
+
+async function getInstallationAccessToken(installationId: string, jwt: string) {
+  try {
+    const response = await fetch(`https://api.github.com/app/installations/${installationId}/access_tokens`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${jwt}`,
+        'Accept': 'application/vnd.github.v3+json',
+        'User-Agent': 'Cyclone-AI-App',
+      },
+    })
+
+    if (!response.ok) {
+      console.error('Failed to get installation token:', response.status, response.statusText)
+      return null
+    }
+
+    const data = await response.json()
+    return data.token
+  } catch (error) {
+    console.error('Error getting installation token:', error)
+    return null
+  }
+}
+
+async function fetchGitHubRepositories(token: string) {
+  try {
+    const response = await fetch('https://api.github.com/installation/repositories', {
+      headers: {
+        'Authorization': `token ${token}`,
+        'Accept': 'application/vnd.github.v3+json',
+        'User-Agent': 'Cyclone-AI-App',
+      },
+    })
+
+    if (!response.ok) {
+      console.error('Failed to fetch repositories:', response.status, response.statusText)
+      return null
+    }
+
+    const data = await response.json()
+    
+    // Return simplified repository objects
+    return data.repositories.map((repo: any) => ({
+      id: repo.id.toString(),
+      name: repo.name,
+      full_name: repo.full_name,
+      private: repo.private,
+      html_url: repo.html_url,
+    }))
+  } catch (error) {
+    console.error('Error fetching repositories:', error)
+    return null
   }
 }
