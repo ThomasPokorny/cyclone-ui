@@ -18,7 +18,7 @@ export default function ConnectGitHubButton({ className }: ConnectGitHubButtonPr
     <Button 
       onClick={handleInstallApp}
       className={className}
-      variant="outline"
+
     >
       <Github className="w-4 h-4 mr-2" />
       Install GitHub App
