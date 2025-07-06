@@ -7,6 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import Link from "next/link";
 import {useState} from "react";
 import {getRandomGreeting} from "@/utils/greetings/greetings";
+import AddOrganizationModal from "@/components/AddOrganizationModal";
 
 interface Organization {
   id: string;
@@ -118,6 +119,12 @@ export default function DashboardOrganizations({ organizations }: DashboardOrgan
           </Table>
         </CardContent>
       </Card>
+
+      <AddOrganizationModal
+          open={isAddModalOpen}
+          onOpenChange={setIsAddModalOpen}
+          onAddOrganization={() => {}}
+      />
     </div>
   );
 }
