@@ -53,3 +53,50 @@ export async function saveInstallation(installationId: string) {
     }
   }
 }
+
+export async function getInstallationByUserId() {
+  try {
+    const authSupabase = await createUserClient()
+    const supabase = getAdminClient()
+    
+    // Get current user
+    const { data: { user }, error: userError } = await authSupabase.auth.getUser()
+    
+    if (userError || !user) {
+      console.error("Failed to get user:", userError)
+      return {
+        success: false,
+        error: "User not authenticated",
+      }
+    }
+
+    console.log("🔍 Getting installation for user:", user.id)
+
+    const { data, error } = await supabase
+      .from("installation")
+      .select("*")
+      .eq("user_id", user.id)
+      .single()
+
+    if (error) {
+      console.error("Supabase error:", error)
+      return {
+        success: false,
+        error: "Failed to get installation",
+      }
+    }
+
+    console.log("✅ Installation found:", data)
+
+    return {
+      success: true,
+      data: data,
+    }
+  } catch (error) {
+    console.error("Server error:", error)
+    return {
+      success: false,
+      error: "An unexpected error occurred. Please try again.",
+    }
+  }
+}
