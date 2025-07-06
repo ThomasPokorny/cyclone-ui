@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import Header from "@/components/Header";
 import OrganizationDetailClient from "./components/OrganizationDetailClient";
 import { getOrganizationById } from "../../actions/organization";
+import { getRepositoriesByOrganizationId } from "../../actions/repositories";
 
 interface OrganizationDetailProps {
   params: {
@@ -25,12 +26,16 @@ export default async function OrganizationDetail({ params }: OrganizationDetailP
     redirect("/dashboard");
   }
 
+  // Fetch repositories for this organization
+  const repositoriesResult = await getRepositoriesByOrganizationId(params.id);
+
   return (
     <div className="min-h-screen bg-background">
       <Header supabaseUser={user} />
       <OrganizationDetailClient 
         organizationId={params.id} 
         organization={organizationResult.data}
+        repositories={repositoriesResult.success ? repositoriesResult.data : []}
       />
     </div>
   );

@@ -11,8 +11,7 @@ import AddRepositoryModal from "@/components/AddRepositoryModal";
 interface Repository {
   id: string;
   name: string;
-  customPrompt: string;
-  status: "active" | "inactive";
+  custom_prompt: string;
 }
 
 interface Organization {
@@ -25,30 +24,12 @@ interface Organization {
 interface OrganizationDetailClientProps {
   organizationId: string;
   organization: Organization;
+  repositories: Repository[];
 }
 
-export default function OrganizationDetailClient({ organizationId, organization }: OrganizationDetailClientProps) {
+export default function OrganizationDetailClient({ organizationId, organization, repositories: initialRepositories }: OrganizationDetailClientProps) {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [repositories, setRepositories] = useState<Repository[]>([
-    {
-      id: "1",
-      name: "frontend-app",
-      customPrompt: "Focus on React best practices and accessibility",
-      status: "active"
-    },
-    {
-      id: "2", 
-      name: "api-backend",
-      customPrompt: "Emphasize security and performance",
-      status: "active"
-    },
-    {
-      id: "3",
-      name: "mobile-client",
-      customPrompt: "",
-      status: "inactive"
-    }
-  ]);
+  const [repositories, setRepositories] = useState<Repository[]>(initialRepositories);
 
   // Mock members count - in real app would fetch from database
   const membersCount = 12;
@@ -57,8 +38,7 @@ export default function OrganizationDetailClient({ organizationId, organization 
     const newRepo: Repository = {
       id: Date.now().toString(),
       name,
-      customPrompt,
-      status: "active"
+      custom_prompt: customPrompt,
     };
     setRepositories([...repositories, newRepo]);
   };
@@ -104,7 +84,7 @@ export default function OrganizationDetailClient({ organizationId, organization 
             <CardContent>
               <div className="text-2xl font-bold">{repositories.length}</div>
               <p className="text-xs text-muted-foreground">
-                {repositories.filter(repo => repo.status === "active").length} active
+                Total repositories
               </p>
             </CardContent>
           </Card>
@@ -149,7 +129,6 @@ export default function OrganizationDetailClient({ organizationId, organization 
                   <TableRow>
                     <TableHead>Name</TableHead>
                     <TableHead>Custom Prompt</TableHead>
-                    <TableHead>Status</TableHead>
                     <TableHead className="w-[50px]"></TableHead>
                   </TableRow>
                 </TableHeader>
@@ -158,16 +137,7 @@ export default function OrganizationDetailClient({ organizationId, organization 
                     <TableRow key={repo.id}>
                       <TableCell className="font-medium">{repo.name}</TableCell>
                       <TableCell className="text-muted-foreground max-w-xs truncate">
-                        {repo.customPrompt || "None"}
-                      </TableCell>
-                      <TableCell>
-                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                          repo.status === "active" 
-                            ? "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400"
-                            : "bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400"
-                        }`}>
-                          {repo.status}
-                        </span>
+                        {repo.custom_prompt || "None"}
                       </TableCell>
                       <TableCell>
                         <Button variant="ghost" size="sm">
