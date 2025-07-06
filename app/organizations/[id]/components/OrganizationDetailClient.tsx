@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import AddRepositoryModal from "@/components/AddRepositoryModal";
+import EditRepositoryModal from "@/components/EditRepositoryModal";
 
 interface Repository {
   id: string;
@@ -29,6 +30,8 @@ interface OrganizationDetailClientProps {
 
 export default function OrganizationDetailClient({ organizationId, organization, repositories: initialRepositories }: OrganizationDetailClientProps) {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editingRepository, setEditingRepository] = useState<Repository | null>(null);
   const [repositories, setRepositories] = useState<Repository[]>(initialRepositories);
 
   // Mock members count - in real app would fetch from database
@@ -41,6 +44,16 @@ export default function OrganizationDetailClient({ organizationId, organization,
       custom_prompt: customPrompt,
     };
     setRepositories([...repositories, newRepo]);
+  };
+
+  const handleEditRepository = (repository: Repository) => {
+    setEditingRepository(repository);
+    setIsEditModalOpen(true);
+  };
+
+  const handleUpdateRepository = () => {
+    // The modal will handle the refresh via window.location.reload()
+    setEditingRepository(null);
   };
 
 
@@ -140,7 +153,14 @@ export default function OrganizationDetailClient({ organizationId, organization,
                         {repo.custom_prompt || "None"}
                       </TableCell>
                       <TableCell>
-                        <Button variant="ghost" size="sm">
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleEditRepository(repo);
+                          }}
+                        >
                           <MoreHorizontal className="w-4 h-4" />
                         </Button>
                       </TableCell>
@@ -157,6 +177,13 @@ export default function OrganizationDetailClient({ organizationId, organization,
         open={isAddModalOpen}
         onOpenChange={setIsAddModalOpen}
         onAddRepository={handleAddRepository}
+      />
+
+      <EditRepositoryModal
+        open={isEditModalOpen}
+        onOpenChange={setIsEditModalOpen}
+        repository={editingRepository}
+        onUpdateRepository={handleUpdateRepository}
       />
     </div>
   );
