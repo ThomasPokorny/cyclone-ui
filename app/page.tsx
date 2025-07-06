@@ -21,7 +21,6 @@ export default function Home() {
     <div className="min-h-screen bg-background">
       <Navigation onGetEarlyAccess={handleGetEarlyAccess} />
       <HeroSection onGetEarlyAccess={handleGetEarlyAccess} />
-      <StatsSection />
       <FeaturesSection />
       <IntegrationSection />
       <CTASection onGetEarlyAccess={handleGetEarlyAccess} />
@@ -30,3 +29,5 @@ export default function Home() {
     </div>
   );
 }
+
+//  <StatsSection />

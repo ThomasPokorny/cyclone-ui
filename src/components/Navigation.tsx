@@ -13,12 +13,32 @@ const Navigation = ({ onGetEarlyAccess }: NavigationProps) => {
     <nav className="border-b border-border/50 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-gradient-to-br from-primary to-accent rounded-lg flex items-center justify-center">
-              <span className="text-background font-bold text-lg">🌪️</span>
+          <Link href="/" className="flex items-center space-x-2 hover:opacity-80 transition-opacity">
+            <div className="flex items-center space-x-2">
+              <div className="w-8 h-8 bg-gradient-to-br from-primary to-accent rounded-lg flex items-center justify-center">
+                <span className="text-background font-bold text-lg">🌪️</span>
+              </div>
+              <span className="font-bold text-xl text-gradient">Cyclone AI</span>
             </div>
-            <span className="font-bold text-xl text-gradient">Cyclone AI</span>
+          </Link>
+
+          <div className="flex items-center gap-4">
+            <SignInButton redirectTo="/dashboard" className="size-sm" />
+            <Button size="sm" className="bg-primary hover:bg-primary/90" onClick={onGetEarlyAccess}>
+              Get Early Access
+              <ArrowRight className="w-4 h-4 ml-2" />
+            </Button>
           </div>
+        </div>
+      </div>
+    </nav>
+  );
+};
+
+export default Navigation;
+
+/*
+
           <div className="hidden md:flex items-center space-x-8">
             <a href="#features" className="text-muted-foreground hover:text-foreground transition-colors">Features</a>
             <a href="#pricing" className="text-muted-foreground hover:text-foreground transition-colors">Pricing</a>
@@ -34,17 +54,4 @@ const Navigation = ({ onGetEarlyAccess }: NavigationProps) => {
               GitHub
             </a>
           </div>
-          <div className="flex items-center gap-4">
-            <SignInButton redirectTo="/dashboard" className="size-sm" />
-            <Button size="sm" className="bg-primary hover:bg-primary/90" onClick={onGetEarlyAccess}>
-              Get Early Access
-              <ArrowRight className="w-4 h-4 ml-2" />
-            </Button>
-          </div>
-        </div>
-      </div>
-    </nav>
-  );
-};
-
-export default Navigation;
+ */
